@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package api.wallet.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "key-manager/api/wallet/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.wallet.v1";
+
+service Wallet {
+	rpc CreateWallet (CreateWalletRequest) returns (CreateWalletReply) {
+		option (google.api.http) = {
+			post: "/wallet/create"
+			body: "*"
+		};
+	}
+	rpc GetAddress (GetAddressRequest) returns (GetAddressReply) {
+		option (google.api.http) = {
+			post: "/wallet/get_address"
+			body: "*"
+		};
+	}
+	rpc SignTransaction (SignTransactionRequest) returns (SignTransactionReply) {
+		option (google.api.http) = {
+			post: "/wallet/sign_transaction"
+			body: "*"
+		};
+	}
+}
+
+message CreateWalletRequest {
+	uint32 strength = 1;
+	string passphrase = 2;
+	string name = 3;
+}
+message CreateWalletReply {
+	string wallet = 1;
+}
+
+message GetAddressRequest {
+	uint32 coinType = 1;
+	string walletName = 2;
+	string passphrase = 3;
+	uint32 addressIndex = 4;
+}
+message GetAddressReply {
+	string address = 1;
+	string error = 2;
+}
+
+message SignTransactionRequest {
+	string address = 1;
+	string passphrase = 2;
+	string txInput = 3;
+}
+message SignTransactionReply {
+	string rawTx = 1;
+	string txId = 2;
+	string error = 3;
+}

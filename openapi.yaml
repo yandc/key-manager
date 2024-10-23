@@ -1,0 +1,161 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: Wallet API
+    version: 0.0.1
+paths:
+    /wallet/create:
+        post:
+            tags:
+                - Wallet
+            operationId: Wallet_CreateWallet
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateWalletRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateWalletReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /wallet/get_address:
+        post:
+            tags:
+                - Wallet
+            operationId: Wallet_GetAddress
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/GetAddressRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetAddressReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /wallet/sign_transaction:
+        post:
+            tags:
+                - Wallet
+            operationId: Wallet_SignTransaction
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SignTransactionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SignTransactionReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+components:
+    schemas:
+        CreateWalletReply:
+            type: object
+            properties:
+                wallet:
+                    type: string
+        CreateWalletRequest:
+            type: object
+            properties:
+                strength:
+                    type: integer
+                    format: uint32
+                passphrase:
+                    type: string
+                name:
+                    type: string
+        GetAddressReply:
+            type: object
+            properties:
+                address:
+                    type: string
+                error:
+                    type: string
+        GetAddressRequest:
+            type: object
+            properties:
+                coinType:
+                    type: integer
+                    format: uint32
+                walletName:
+                    type: string
+                passphrase:
+                    type: string
+                addressIndex:
+                    type: integer
+                    format: uint32
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        SignTransactionReply:
+            type: object
+            properties:
+                rawTx:
+                    type: string
+                txId:
+                    type: string
+                error:
+                    type: string
+        SignTransactionRequest:
+            type: object
+            properties:
+                address:
+                    type: string
+                passphrase:
+                    type: string
+                txInput:
+                    type: string
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+tags:
+    - name: Wallet
