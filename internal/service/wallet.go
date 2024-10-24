@@ -16,6 +16,8 @@ import (
 	pb "key-manager/api/wallet/v1"
 	"key-manager/internal/data"
 	"key-manager/internal/data/models"
+
+	"gorm.io/gorm"
 )
 
 type WalletService struct {
@@ -46,10 +48,10 @@ func (s *WalletService) CreateWallet(ctx context.Context, req *pb.CreateWalletRe
 		Name:    req.Name,
 		Entropy: entropy,
 	}
-	err := s.data.DB.Save(wallet).Error
+	err := s.data.DB.Save(&wallet).Error
 	if err != nil {
-		s.data.Log.Error("save wallet error: ", err, req.Name)
-		return nil, err
+		s.data.Log.Error("create wallet error: ", err, req.Name)
+		return &pb.CreateWalletReply{Error: err.Error()}, nil
 	}
 	return &pb.CreateWalletReply{Wallet: entropy}, nil
 }
@@ -65,10 +67,10 @@ func (s *WalletService) GetAddress(ctx context.Context, req *pb.GetAddressReques
 		AddressIndex: req.AddressIndex,
 		Address:      a,
 	}
-	err := s.data.DB.Save(address).Error
-	if err != nil {
+	err := s.data.DB.Save(&address).Error
+	if err != nil && !errors.Is(err, gorm.ErrDuplicatedKey) {
 		s.data.Log.Error("derive address error: ", err, req.WalletName, req.CoinType, req.AddressIndex)
-		return nil, err
+		return &pb.GetAddressReply{Error: err.Error()}, err
 	}
 	return &pb.GetAddressReply{Address: a}, nil
 }
@@ -76,20 +78,24 @@ func (s *WalletService) SignTransaction(ctx context.Context, req *pb.SignTransac
 	var address *models.Address
 	var wallet *models.Wallet
 	if err := s.data.DB.Where("address = ?", req.Address).First(&address).Error; err != nil {
-		return nil, err
+		s.data.Log.Error("search address error: ", err, req.Address)
+		return &pb.SignTransactionReply{Error: err.Error()}, nil
 	}
 	if err := s.data.DB.Where("name = ?", address.WalletName).First(&wallet).Error; err != nil {
-		return nil, err
+		s.data.Log.Error("search wallet error: ", err, address.WalletName)
+		return &pb.SignTransactionReply{Error: err.Error()}, nil
 	}
 
 	trans := unsafe.Pointer(C.CppJsonTransactionHDWallet(C.CString(req.TxInput), C.CString(wallet.Entropy), C.CString(req.Passphrase), C.int(address.CoinType), C.int(address.AddressIndex)))
 	rawTx := GetCppString(trans)
 	var signed SignResult
 	if err := json.Unmarshal([]byte(rawTx), &signed); err != nil {
-		return nil, err
+		s.data.Log.Error("sign transaction error: ", err, req.Address, req.TxInput, rawTx)
+		return &pb.SignTransactionReply{Error: err.Error()}, nil
 	}
 	if !signed.Status {
-		return nil, errors.New(signed.Error)
+		s.data.Log.Error("sign transaction error: ", signed.Error, req.Address, req.TxInput)
+		return &pb.SignTransactionReply{Error: signed.Error}, nil
 	}
 	return &pb.SignTransactionReply{RawTx: signed.Result, TxId: signed.TxId}, nil
 }

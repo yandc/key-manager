@@ -36,6 +36,7 @@ message CreateWalletRequest {
 }
 message CreateWalletReply {
 	string wallet = 1;
+	string error = 2;
 }
 
 message GetAddressRequest {

@@ -85,6 +85,8 @@ components:
             properties:
                 wallet:
                     type: string
+                error:
+                    type: string
         CreateWalletRequest:
             type: object
             properties:
