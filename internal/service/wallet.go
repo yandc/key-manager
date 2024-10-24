@@ -10,14 +10,11 @@ import "C"
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"unsafe"
 
 	pb "key-manager/api/wallet/v1"
 	"key-manager/internal/data"
 	"key-manager/internal/data/models"
-
-	"gorm.io/gorm"
 )
 
 type WalletService struct {
@@ -58,6 +55,7 @@ func (s *WalletService) CreateWallet(ctx context.Context, req *pb.CreateWalletRe
 func (s *WalletService) GetAddress(ctx context.Context, req *pb.GetAddressRequest) (*pb.GetAddressReply, error) {
 	var wallet *models.Wallet
 	if err := s.data.DB.Where("name = ?", req.WalletName).First(&wallet).Error; err != nil {
+		s.data.Log.Error("search wallet error: ", err, req.WalletName)
 		return nil, err
 	}
 	a := C.GoString(C.CppDeriveAddressFromHDWallet(C.CString(wallet.Entropy), C.CString(req.Passphrase), C.int(req.CoinType), C.int(req.AddressIndex)))
@@ -68,9 +66,8 @@ func (s *WalletService) GetAddress(ctx context.Context, req *pb.GetAddressReques
 		Address:      a,
 	}
 	err := s.data.DB.Save(&address).Error
-	if err != nil && !errors.Is(err, gorm.ErrDuplicatedKey) {
-		s.data.Log.Error("derive address error: ", err, req.WalletName, req.CoinType, req.AddressIndex)
-		return &pb.GetAddressReply{Error: err.Error()}, err
+	if err != nil {
+		s.data.Log.Error("save address error: ", err, req.WalletName, req.CoinType, req.AddressIndex)
 	}
 	return &pb.GetAddressReply{Address: a}, nil
 }
