@@ -56,7 +56,7 @@ func (s *WalletService) GetAddress(ctx context.Context, req *pb.GetAddressReques
 	var wallet *models.Wallet
 	if err := s.data.DB.Where("name = ?", req.WalletName).First(&wallet).Error; err != nil {
 		s.data.Log.Error("search wallet error: ", err, req.WalletName)
-		return nil, err
+		return &pb.GetAddressReply{Error: err.Error()}, nil
 	}
 	a := C.GoString(C.CppDeriveAddressFromHDWallet(C.CString(wallet.Entropy), C.CString(req.Passphrase), C.int(req.CoinType), C.int(req.AddressIndex)))
 	address := models.Address{
