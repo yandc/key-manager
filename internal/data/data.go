@@ -5,6 +5,7 @@ import (
 	"key-manager/internal/data/models"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-redis/redis/v8"
 	"github.com/google/wire"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -16,8 +17,9 @@ var ProviderSet = wire.NewSet(NewData)
 // Data .
 type Data struct {
 	// TODO wrapped database client
-	DB  *gorm.DB
-	Log *log.Helper
+	DB       *gorm.DB
+	RedisCli *redis.Client
+	Log      *log.Helper
 }
 
 // NewData .
@@ -33,5 +35,11 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	if err := db.AutoMigrate(&models.Wallet{}, &models.Address{}, &models.TransactionSignRecord{}); err != nil {
 		log.Fatal(err)
 	}
-	return &Data{DB: db, Log: log}, cleanup, nil
+
+	cli := redis.NewClient(&redis.Options{
+		Addr: c.Redis.Addr,
+		DB:   int(c.Redis.Db),
+	})
+
+	return &Data{DB: db, RedisCli: cli, Log: log}, cleanup, nil
 }

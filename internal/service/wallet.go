@@ -15,6 +15,13 @@ import (
 	pb "key-manager/api/wallet/v1"
 	"key-manager/internal/data"
 	"key-manager/internal/data/models"
+	"strings"
+
+	uuid "github.com/satori/go.uuid"
+)
+
+const (
+	USERCENTER_ADDRESS_KEY = "usercenter:"
 )
 
 type WalletService struct {
@@ -27,6 +34,11 @@ type SignResult struct {
 	Result string `json:"result"`
 	Status bool   `json:"status"`
 	Error  string `json:"error"`
+}
+
+type AddrInfo struct {
+	Uid     string `json:"uid"`
+	UidType string `json:"uid_type"`
 }
 
 func GetCppString(cppStr unsafe.Pointer) string {
@@ -69,6 +81,16 @@ func (s *WalletService) GetAddress(ctx context.Context, req *pb.GetAddressReques
 	if err != nil {
 		s.data.Log.Error("save address error: ", err, req.WalletName, req.CoinType, req.AddressIndex)
 	}
+
+	addrInfo, _ := json.Marshal(AddrInfo{
+		Uid:     req.WalletName,
+		UidType: "",
+	})
+	addrKey := USERCENTER_ADDRESS_KEY + a
+	set := s.data.RedisCli.Set(context.Background(), addrKey, string(addrInfo), 0)
+	if _, err := set.Result(); err != nil {
+		s.data.Log.Error("set redis address error: ", err)
+	}
 	return &pb.GetAddressReply{Address: a}, nil
 }
 func (s *WalletService) SignTransaction(ctx context.Context, req *pb.SignTransactionRequest) (*pb.SignTransactionReply, error) {
@@ -94,5 +116,22 @@ func (s *WalletService) SignTransaction(ctx context.Context, req *pb.SignTransac
 		s.data.Log.Error("sign transaction error: ", signed.Error, req.Address, req.TxInput)
 		return &pb.SignTransactionReply{Error: signed.Error}, nil
 	}
-	return &pb.SignTransactionReply{RawTx: signed.Result, TxId: signed.TxId}, nil
+	signRec := models.TransactionSignRecord{
+		WalletName: address.WalletName,
+		Address:    address.Address,
+		TxInput:    req.TxInput,
+		RawTx:      rawTx,
+		SessionId:  GetUUID(),
+	}
+	err := s.data.DB.Save(&signRec).Error
+	if err != nil {
+		s.data.Log.Error("save sign record error: ", err, address.Address)
+	}
+	return &pb.SignTransactionReply{RawTx: signed.Result, TxId: signed.TxId, SessionId: signRec.SessionId}, nil
+}
+
+func GetUUID() string {
+	id := uuid.NewV4().String()
+	uuid := strings.Replace(id, "-", "", 4)
+	return uuid
 }

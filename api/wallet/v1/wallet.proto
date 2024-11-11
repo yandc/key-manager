@@ -58,5 +58,6 @@ message SignTransactionRequest {
 message SignTransactionReply {
 	string rawTx = 1;
 	string txId = 2;
-	string error = 3;
+	string sessionId = 3;
+	string error = 4;
 }

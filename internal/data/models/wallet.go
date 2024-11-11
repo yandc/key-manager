@@ -20,4 +20,5 @@ type TransactionSignRecord struct {
 	Address    string
 	TxInput    string
 	RawTx      string
+	SessionId  string
 }

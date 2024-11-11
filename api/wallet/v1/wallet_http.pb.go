@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.8.1
 // - protoc             v5.26.1
-// source: api/wallet/v1/wallet.proto
+// source: wallet/v1/wallet.proto
 
 package v1
 

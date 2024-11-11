@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.26.1
-// source: api/wallet/v1/wallet.proto
+// source: wallet/v1/wallet.proto
 
 package v1
 
@@ -193,5 +193,5 @@ var Wallet_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/wallet/v1/wallet.proto",
+	Metadata: "wallet/v1/wallet.proto",
 }

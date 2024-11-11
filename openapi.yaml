@@ -15,7 +15,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/CreateWalletRequest'
+                            $ref: '#/components/schemas/api.wallet.v1.CreateWalletRequest'
                 required: true
             responses:
                 "200":
@@ -23,13 +23,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/CreateWalletReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
+                                $ref: '#/components/schemas/api.wallet.v1.CreateWalletReply'
     /wallet/get_address:
         post:
             tags:
@@ -39,7 +33,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/GetAddressRequest'
+                            $ref: '#/components/schemas/api.wallet.v1.GetAddressRequest'
                 required: true
             responses:
                 "200":
@@ -47,13 +41,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetAddressReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
+                                $ref: '#/components/schemas/api.wallet.v1.GetAddressReply'
     /wallet/sign_transaction:
         post:
             tags:
@@ -63,7 +51,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/SignTransactionRequest'
+                            $ref: '#/components/schemas/api.wallet.v1.SignTransactionRequest'
                 required: true
             responses:
                 "200":
@@ -71,23 +59,17 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/SignTransactionReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
+                                $ref: '#/components/schemas/api.wallet.v1.SignTransactionReply'
 components:
     schemas:
-        CreateWalletReply:
+        api.wallet.v1.CreateWalletReply:
             type: object
             properties:
                 wallet:
                     type: string
                 error:
                     type: string
-        CreateWalletRequest:
+        api.wallet.v1.CreateWalletRequest:
             type: object
             properties:
                 strength:
@@ -97,14 +79,14 @@ components:
                     type: string
                 name:
                     type: string
-        GetAddressReply:
+        api.wallet.v1.GetAddressReply:
             type: object
             properties:
                 address:
                     type: string
                 error:
                     type: string
-        GetAddressRequest:
+        api.wallet.v1.GetAddressRequest:
             type: object
             properties:
                 coinType:
@@ -117,24 +99,18 @@ components:
                 addressIndex:
                     type: integer
                     format: uint32
-        GoogleProtobufAny:
-            type: object
-            properties:
-                '@type':
-                    type: string
-                    description: The type of the serialized message.
-            additionalProperties: true
-            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
-        SignTransactionReply:
+        api.wallet.v1.SignTransactionReply:
             type: object
             properties:
                 rawTx:
                     type: string
                 txId:
                     type: string
+                sessionId:
+                    type: string
                 error:
                     type: string
-        SignTransactionRequest:
+        api.wallet.v1.SignTransactionRequest:
             type: object
             properties:
                 address:
@@ -143,21 +119,5 @@ components:
                     type: string
                 txInput:
                     type: string
-        Status:
-            type: object
-            properties:
-                code:
-                    type: integer
-                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
-                    format: int32
-                message:
-                    type: string
-                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
-                details:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/GoogleProtobufAny'
-                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
-            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
 tags:
     - name: Wallet
