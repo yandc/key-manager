@@ -37,8 +37,7 @@ type SignResult struct {
 }
 
 type AddrInfo struct {
-	Uid     string `json:"uid"`
-	UidType string `json:"uid_type"`
+	Uid string `json:"uid"`
 }
 
 func GetCppString(cppStr unsafe.Pointer) string {
@@ -64,6 +63,7 @@ func (s *WalletService) CreateWallet(ctx context.Context, req *pb.CreateWalletRe
 	}
 	return &pb.CreateWalletReply{Wallet: entropy}, nil
 }
+
 func (s *WalletService) GetAddress(ctx context.Context, req *pb.GetAddressRequest) (*pb.GetAddressReply, error) {
 	var wallet *models.Wallet
 	if err := s.data.DB.Where("name = ?", req.WalletName).First(&wallet).Error; err != nil {
@@ -82,10 +82,7 @@ func (s *WalletService) GetAddress(ctx context.Context, req *pb.GetAddressReques
 		s.data.Log.Error("save address error: ", err, req.WalletName, req.CoinType, req.AddressIndex)
 	}
 
-	addrInfo, _ := json.Marshal(AddrInfo{
-		Uid:     req.WalletName,
-		UidType: "",
-	})
+	addrInfo, _ := json.Marshal(AddrInfo{Uid: req.WalletName})
 	addrKey := USERCENTER_ADDRESS_KEY + a
 	set := s.data.RedisCli.Set(context.Background(), addrKey, string(addrInfo), 0)
 	if _, err := set.Result(); err != nil {
@@ -93,6 +90,7 @@ func (s *WalletService) GetAddress(ctx context.Context, req *pb.GetAddressReques
 	}
 	return &pb.GetAddressReply{Address: a}, nil
 }
+
 func (s *WalletService) SignTransaction(ctx context.Context, req *pb.SignTransactionRequest) (*pb.SignTransactionReply, error) {
 	var address *models.Address
 	var wallet *models.Wallet
