@@ -2,7 +2,7 @@ package service
 
 /*
 #cgo CFLAGS: -I.
-#cgo LDFLAGS: -L./libs -lwallet_core -lgo_mili -Wl,-rpath,libs
+#cgo LDFLAGS: -L../../../libs -lwallet_core -lgo_mili -Wl,-rpath,libs
 #include "WalletCoreMili.h"
 */
 import "C"
@@ -118,6 +118,7 @@ func (s *WalletService) SignTransaction(ctx context.Context, req *pb.SignTransac
 		WalletName: address.WalletName,
 		Address:    address.Address,
 		TxInput:    req.TxInput,
+		TxId:       signed.TxId,
 		RawTx:      rawTx,
 		SessionId:  GetUUID(),
 	}

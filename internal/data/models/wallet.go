@@ -19,6 +19,7 @@ type TransactionSignRecord struct {
 	WalletName string
 	Address    string
 	TxInput    string
+	TxId       string
 	RawTx      string
 	SessionId  string
 }
